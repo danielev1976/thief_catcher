@@ -16,7 +16,7 @@ Du kommer att:
 
 * Förstå relationer mellan tabeller och hur de mappas i Java
 
-*💡 Läs igenom hela instruktionen innan du börjar. Tänk på att namnge klasser och fält enligt Java-konventioner (camelCase) även om kolumnnamnen i databasen använder underscore.*
+*Läs igenom hela instruktionen innan du börjar. Tänk på att namnge klasser och fält enligt Java-konventioner (camelCase) även om kolumnnamnen i databasen använder underscore.*
 
 # **Krav & förberedelser**
 
@@ -26,7 +26,7 @@ Innan du börjar, se till att du har följande på plats:
 
 * Spring Boot-projekt skapat (använd Spring Initializr med beroenden: Spring Data JPA, MySQL Driver)
 
-* application.properties konfigurerat med din databasanslutning
+* application.yaml konfigurerat med din databasanslutning
 
 * Jakarta Persistence (JPA) / Hibernate aktiverat
 
@@ -81,9 +81,9 @@ Nedan visas en översikt över alla tabeller och deras relationer.
 
 # **Del 1 – Skapa tabellerna i MySQL**
 
-Skriv en CREATE TABLE-sats för varje tabell nedan. Specifikationerna beskriver vilka kolumner som ska finnas, deras datatyper och begränsningar. Notera alla primär- och främmande nycklar.
+Skriv en CREATE TABLE-sats för varje tabell nedan. Specifikationerna beskriver vilka kolumner som ska finnas, deras datatyper och begränsningar. Notera alla primärnycklar (primary keys) och främmande nycklar (foreign keys).
 
-*💡 Skapa tabellerna i den ordning de presenteras, eftersom senare tabeller refererar till tidigare skapade tabeller.*
+* Skapa tabellerna i den ordning de presenteras, eftersom senare tabeller refererar till tidigare skapade tabeller.*
 
 ## **Tabell 1: player**
 
@@ -96,10 +96,10 @@ Lagrar alla registrerade användare i spelet.
 | email | VARCHAR(100) | NOT NULL, UNIQUE |
 | password\_hash | VARCHAR(255) | NOT NULL |
 | role | ENUM | Tillåtna värden: 'detective', 'thief', 'admin' – NOT NULL |
-| created\_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
-| last\_login | TIMESTAMP | Kan vara NULL |
+| created_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| last_login | TIMESTAMP | Kan vara NULL |
 
-## **Tabell 2: games**
+## **Tabell 2: game**
 
 Representerar en spelsession.
 
@@ -107,11 +107,11 @@ Representerar en spelsession.
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
 | status | ENUM | Värden: 'waiting', 'active', 'completed', 'abandoned' – DEFAULT 'waiting' |
-| map\_id | INT | Refererar till map(id) |
-| started\_at | TIMESTAMP | Kan vara NULL |
-| ended\_at | TIMESTAMP | Kan vara NULL |
-| winner\_role | ENUM | Värden: 'detective', 'thief' – kan vara NULL |
-| created\_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| map_id | INT | Refererar till map(id) |
+| started_at | TIMESTAMP | Kan vara NULL |
+| ended_at | TIMESTAMP | Kan vara NULL |
+| winner_role | ENUM | Värden: 'detective', 'thief' – kan vara NULL |
+| created_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
 
 ## **Tabell 3: map**
 
@@ -121,8 +121,8 @@ Beskriver en spelkarta med ett rutmönster.
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
 | name | VARCHAR(100) | NOT NULL |
-| grid\_width | INT | NOT NULL |
-| grid\_height | INT | NOT NULL |
+| grid_width | INT | NOT NULL |
+| grid_height | INT | NOT NULL |
 | description | TEXT | Kan vara NULL |
 
 ## **Tabell 4: location**
@@ -132,10 +132,10 @@ En plats/nod på en karta. Varje plats tillhör en karta.
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| map\_id | INT | NOT NULL – Refererar till map(id) |
+| map_id | INT | NOT NULL – Refererar till map(id) |
 | name | VARCHAR(100) | NOT NULL |
-| coord\_x | INT | NOT NULL |
-| coord\_y | INT | NOT NULL |
+| coord_x | INT | NOT NULL |
+| coord_y | INT | NOT NULL |
 | type | ENUM | Värden: 'street', 'building', 'hideout', 'checkpoint' – DEFAULT 'street' |
 
 ## **Tabell 5: route**
@@ -145,24 +145,24 @@ En förbindelse (kant) mellan två platser på kartan. Anger transportmedel och 
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| map\_id | INT | NOT NULL – Refererar till map(id) |
-| from\_location | INT | NOT NULL – Refererar till location(id) |
-| to\_location | INT | NOT NULL – Refererar till location(id) |
+| map_id | INT | NOT NULL – Refererar till map(id) |
+| from_location | INT | NOT NULL – Refererar till location(id) |
+| to_location | INT | NOT NULL – Refererar till location(id) |
 | transport | ENUM | Värden: 'foot', 'vehicle', 'subway' – DEFAULT 'foot' |
 | distance | INT | DEFAULT 1 |
 
-## **Tabell 6: game\_player**
+## **Tabell 6: game_player**
 
 Kopplingstabell som anger vilka spelare som deltar i ett spel och i vilken roll.
 
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| game\_id | INT | NOT NULL – Refererar till games(id) |
-| player\_id | INT | NOT NULL – Refererar till player(id) |
+| game_id | INT | NOT NULL – Refererar till game(id) |
+| player_id | INT | NOT NULL – Refererar till player(id) |
 | role | ENUM | Värden: 'detective', 'thief' – NOT NULL |
-| is\_caught | BOOLEAN | DEFAULT FALSE |
-| joined\_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| is_caught | BOOLEAN | DEFAULT FALSE |
+| joined_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
 ## **Tabell 7: move**
 
@@ -171,13 +171,13 @@ Lagrar varje spelares rörelse under en omgång. from\_loc kan vara NULL vid spe
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| game\_id | INT | NOT NULL – Refererar till games(id) |
-| player\_id | INT | NOT NULL – Refererar till player(id) |
-| from\_loc | INT | Kan vara NULL – Refererar till location(id) |
-| to\_loc | INT | NOT NULL – Refererar till location(id) |
+| game_id | INT | NOT NULL – Refererar till game(id) |
+| player_id | INT | NOT NULL – Refererar till player(id) |
+| from_loc | INT | Kan vara NULL – Refererar till location(id) |
+| to_loc | INT | NOT NULL – Refererar till location(id) |
 | transport | ENUM | Värden: 'foot', 'vehicle', 'subway' – DEFAULT 'foot' |
-| turn\_number | INT | NOT NULL |
-| moved\_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| turn_number | INT | NOT NULL |
+| moved_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
 ## **Tabell 8: clue**
 
@@ -186,13 +186,13 @@ Ledtrådar kopplade till ett spel och en plats. found\_by anger vilken detektiv 
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| game\_id | INT | NOT NULL – Refererar till games(id) |
-| location\_id | INT | NOT NULL – Refererar till location(id) |
-| found\_by | INT | Kan vara NULL – Refererar till player(id) |
+| game_id | INT | NOT NULL – Refererar till games(id) |
+| location_id | INT | NOT NULL – Refererar till location(id) |
+| found_by | INT | Kan vara NULL – Refererar till player(id) |
 | description | TEXT | Kan vara NULL |
-| is\_found | BOOLEAN | DEFAULT FALSE |
-| created\_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
-| found\_at | TIMESTAMP | Kan vara NULL |
+| is_found | BOOLEAN | DEFAULT FALSE |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
+| found_at | TIMESTAMP | Kan vara NULL |
 
 ## **Tabell 9: catch\_attempt**
 
@@ -201,12 +201,12 @@ Registrerar varje gripningsförsök: vilken detektiv försökte gripa vilken tju
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| game\_id | INT | NOT NULL – Refererar till games(id) |
-| detective\_id | INT | NOT NULL – Refererar till player(id) |
-| thief\_id | INT | NOT NULL – Refererar till player(id) |
-| location\_id | INT | NOT NULL – Refererar till location(id) |
+| game_id | INT | NOT NULL – Refererar till game(id) |
+| detective_id | INT | NOT NULL – Refererar till player(id) |
+| thief_id | INT | NOT NULL – Refererar till player(id) |
+| location_id | INT | NOT NULL – Refererar till location(id) |
 | successful | BOOLEAN | NOT NULL |
-| attempted\_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| attempted_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
 ## **Tabell 10: player\_stats**
 
@@ -215,17 +215,20 @@ En-till-en-relation med player. Lagrar ackumulerad statistik för varje spelare.
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| player\_id | INT | NOT NULL, UNIQUE – Refererar till player(id) |
-| games\_played | INT | DEFAULT 0 |
-| games\_won | INT | DEFAULT 0 |
-| times\_caught | INT | DEFAULT 0 |
-| thieves\_caught | INT | DEFAULT 0 |
+| player_id | INT | NOT NULL, UNIQUE – Refererar till player(id) |
+| games_played | INT | DEFAULT 0 |
+| games_won | INT | DEFAULT 0 |
+| times_caught | INT | DEFAULT 0 |
+| thieves_caught | INT | DEFAULT 0 |
 
 # **Del 2 – Skapa JPA-entiteter i Spring Boot**
 
 För varje tabell du skapade i Del 1 ska du nu skriva en motsvarande Java-klass annoterad med JPA-annotationer. Varje entitet ska mappas mot sin tabell och alla relationer ska uttryckas med rätt annotations.
 
-*💡 Kom ihåg att lägga @Entity och @Table(name \= "...") på varje klass, samt @Id och @GeneratedValue(strategy \= GenerationType.IDENTITY) på primärnyckelfältet.*
+*Kom ihåg annotationerna:* 
+- @Entity på varje klass
+- @Table(name \= "...") behövs inte om du följt mina anvisningar på namngivningen
+- @Id och @GeneratedValue(strategy \= GenerationType.IDENTITY) på primärnyckelfältet
 
 **Grundläggande annotationer att använda:**
 
@@ -235,19 +238,19 @@ För varje tabell du skapade i Del 1 ska du nu skriva en motsvarande Java-klass 
 
 * @Id – markerar primärnyckelfältet
 
-* @GeneratedValue(strategy \= GenerationType.IDENTITY) – auto-increment
+* @GeneratedValue(strategy = GenerationType.IDENTITY) – auto-increment
 
-* @Column(name \= "kolumnnamn") – mappar ett fält till en kolumn
+* @Column(name = "kolumnnamn") – mappar ett fält till en kolumn
 
 * @Enumerated(EnumType.STRING) – för ENUM-kolumner
 
-* @CreationTimestamp – för automatiska created\_at-fält
+* @CreationTimestamp – för automatiska created_at-fält
 
 * @ManyToOne / @OneToMany – för relationer
 
 * @OneToOne – för en-till-en-relationer (t.ex. PlayerStats ↔ Player)
 
-* @JoinColumn(name \= "fk\_kolumn") – anger vilken kolumn som är foreign key
+* @JoinColumn(name = "fk_kolumn") – anger vilken kolumn som är foreign key
 
 ## **Entitet 1: Player**
 
@@ -260,8 +263,8 @@ Motsvara tabellen player. Skapa ett enum PlayerRole med värdena DETECTIVE, THIE
 | email | String | email |
 | passwordHash | String | password\_hash |
 | role | PlayerRole (enum) | role – använd @Enumerated(EnumType.STRING) |
-| createdAt | LocalDateTime / Instant | created\_at |
-| lastLogin | LocalDateTime / Instant | last\_login (nullable) |
+| createdAt | LocalDateTime / Instant | created_at |
+| lastLogin | LocalDateTime / Instant | last_login (nullable) |
 
 ## **Entitet 2: Game**
 
@@ -271,10 +274,10 @@ Motsvara tabellen games. Skapa enum GameStatus (WAITING, ACTIVE, COMPLETED, ABAN
 | :---- | :---- | :---- |
 | id | Long | id |
 | status | GameStatus (enum) | status |
-| map | Map | @ManyToOne → map\_id |
-| startedAt | LocalDateTime | started\_at (nullable) |
-| endedAt | LocalDateTime | ended\_at (nullable) |
-| winnerRole | WinnerRole (enum) | winner\_role (nullable) |
+| map | Map | @ManyToOne → map_id |
+| startedAt | LocalDateTime | started_at (nullable) |
+| endedAt | LocalDateTime | ended_at (nullable) |
+| winnerRole | WinnerRole (enum) | winner_role (nullable) |
 | createdAt | LocalDateTime | created\_at |
 
 ## **Entitet 3: Map**
@@ -285,8 +288,8 @@ Motsvara tabellen map. Obs: Map är ett reserverat ord i Java – döp klassen t
 | :---- | :---- | :---- |
 | id | Long | id |
 | name | String | name |
-| gridWidth | Integer | grid\_width |
-| gridHeight | Integer | grid\_height |
+| gridWidth | Integer | grid_width |
+| gridHeight | Integer | grid_height |
 | description | String | description (nullable) |
 
 ## **Entitet 4: Location**
@@ -310,8 +313,8 @@ Motsvara tabellen route. Skapa enum TransportType (FOOT, VEHICLE, SUBWAY) – de
 | :---- | :---- | :---- |
 | id | Long | id |
 | map | GameMap | @ManyToOne → map\_id |
-| fromLocation | Location | @ManyToOne → from\_location |
-| toLocation | Location | @ManyToOne → to\_location |
+| fromLocation | Location | @ManyToOne → from_location |
+| toLocation | Location | @ManyToOne → to_location |
 | transport | TransportType (enum) | transport |
 | distance | Integer | distance |
 
@@ -322,11 +325,11 @@ Kopplingstabell mellan Game och Player. Skapa enum GameRole (DETECTIVE, THIEF).
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
 | :---- | :---- | :---- |
 | id | Long | id |
-| game | Game | @ManyToOne → game\_id |
-| player | Player | @ManyToOne → player\_id |
+| game | Game | @ManyToOne → game_id |
+| player | Player | @ManyToOne → player_id |
 | role | GameRole (enum) | role |
-| isCaught | Boolean | is\_caught |
-| joinedAt | LocalDateTime | joined\_at |
+| isCaught | Boolean | is_caught |
+| joinedAt | LocalDateTime | joined_at |
 
 ## **Entitet 7: Move**
 
@@ -335,13 +338,13 @@ Lagrar ett drag i spelet. fromLoc kan vara null (spelets start). Återanvänd Tr
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
 | :---- | :---- | :---- |
 | id | Long | id |
-| game | Game | @ManyToOne → game\_id |
-| player | Player | @ManyToOne → player\_id |
-| fromLoc | Location | @ManyToOne → from\_loc (nullable) |
-| toLoc | Location | @ManyToOne → to\_loc |
+| game | Game | @ManyToOne → game_id |
+| player | Player | @ManyToOne → player_id |
+| fromLoc | Location | @ManyToOne → from_loc (nullable) |
+| toLoc | Location | @ManyToOne → to_loc |
 | transport | TransportType (enum) | transport |
-| turnNumber | Integer | turn\_number |
-| movedAt | LocalDateTime | moved\_at |
+| turnNumber | Integer | turn_number |
+| movedAt | LocalDateTime | moved_at |
 
 ## **Entitet 8: Clue**
 
@@ -350,13 +353,13 @@ En ledtråd kopplad till ett spel och en plats. foundBy är null tills en detekt
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
 | :---- | :---- | :---- |
 | id | Long | id |
-| game | Game | @ManyToOne → game\_id |
-| location | Location | @ManyToOne → location\_id |
-| foundBy | Player | @ManyToOne → found\_by (nullable) |
+| game | Game | @ManyToOne → game_id |
+| location | Location | @ManyToOne → location_id |
+| foundBy | Player | @ManyToOne → found_by (nullable) |
 | description | String | description (nullable) |
-| isFound | Boolean | is\_found |
-| createdAt | LocalDateTime | created\_at |
-| foundAt | LocalDateTime | found\_at (nullable) |
+| isFound | Boolean | is_found |
+| createdAt | LocalDateTime | created_at |
+| foundAt | LocalDateTime | found_at (nullable) |
 
 ## **Entitet 9: CatchAttempt**
 
@@ -365,12 +368,12 @@ Registrerar ett gripningsförsök. Notera att både detective och thief är rela
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
 | :---- | :---- | :---- |
 | id | Long | id |
-| game | Game | @ManyToOne → game\_id |
-| detective | Player | @ManyToOne → detective\_id |
-| thief | Player | @ManyToOne → thief\_id |
-| location | Location | @ManyToOne → location\_id |
+| game | Game | @ManyToOne → game_id |
+| detective | Player | @ManyToOne → detective_id |
+| thief | Player | @ManyToOne → thief_id |
+| location | Location | @ManyToOne → location_id |
 | successful | Boolean | successful – NOT NULL |
-| attemptedAt | LocalDateTime | attempted\_at |
+| attemptedAt | LocalDateTime | attempted_at |
 
 ## **Entitet 10: PlayerStats**
 
@@ -379,11 +382,11 @@ En-till-en-relation med Player. Använd @OneToOne och @JoinColumn.
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
 | :---- | :---- | :---- |
 | id | Long | id |
-| player | Player | @OneToOne → player\_id (UNIQUE) |
-| gamesPlayed | Integer | games\_played – DEFAULT 0 |
-| gamesWon | Integer | games\_won – DEFAULT 0 |
-| timesCaught | Integer | times\_caught – DEFAULT 0 |
-| thievesCaught | Integer | thieves\_caught – DEFAULT 0 |
+| player | Player | @OneToOne → player_id (UNIQUE) |
+| gamesPlayed | Integer | games_played – DEFAULT 0 |
+| gamesWon | Integer | games_won – DEFAULT 0 |
+| timesCaught | Integer | times_caught – DEFAULT 0 |
+| thievesCaught | Integer | thieves_caught – DEFAULT 0 |
 
 # **Del 3 – Tips och vanliga misstag**
 
