@@ -50,70 +50,71 @@ Nedan visas en översikt över alla tabeller och deras relationer.
 
 **Tabeller i systemet:**
 
-| Tabell | Beskrivning |
-| :---- | :---- |
-| player | Alla användare i systemet: detektiver, tjuvar och admins |
-| games | Spelsessioner med status, tidsstämplar och vinnare |
-| map | Spelkartor med dimensioner |
-| location | Platser/noder på en karta (gator, byggnader, gömställen) |
-| route | Förbindelser mellan platser (kanter i grafen) |
-| game\_player | Kopplingstabell – vilka spelare deltar i vilket spel |
-| move | Rörelshistorik – varje spelares drag per omgång |
-| clue | Ledtrådar som tjuven lämnar och detektiver hittar |
-| catch\_attempt | Gripningsförsök av detektiver |
-| player\_stats | Samlad statistik per spelare |
+| Tabell        | Beskrivning |
+|:--------------| :---- |
+| player        | Alla användare i systemet: detektiver, tjuvar och admins |
+| game          | Spelsessioner med status, tidsstämplar och vinnare |
+| game_map      | Spelkartor med dimensioner |
+| location      | Platser/noder på en karta (gator, byggnader, gömställen) |
+| route         | Förbindelser mellan platser (kanter i grafen) |
+| game_player   | Kopplingstabell – vilka spelare deltar i vilket spel |
+| move          | Rörelshistorik – varje spelares drag per omgång |
+| clue          | Ledtrådar som tjuven lämnar och detektiver hittar |
+| catch_attempt | Gripningsförsök av detektiver |
+| player_stats  | Samlad statistik per spelare |
 
 **Relationsöversikt:**
 
-* En map har många locations och routes
+* En game_map har många locations och routes
 
-* En location tillhör en map
+* En location tillhör en game_map
 
 * En route kopplar ihop två locations (from\_location → to\_location)
 
-* En games refererar till en map
+* En game refererar till en game_map
 
-* game\_player kopplar samman games och player (många-till-många)
+* game_player kopplar samman games och player (många-till-många)
 
-* move, clue och catch\_attempt refererar till games och player
+* move, clue och catch_attempt refererar till games och player
 
-* player\_stats har en ett-till-ett-relation med player
+* player_stats har en ett-till-ett-relation med player
 
 # **Del 1 – Skapa tabellerna i MySQL**
 
-Skriv en CREATE TABLE-sats för varje tabell nedan. Specifikationerna beskriver vilka kolumner som ska finnas, deras datatyper och begränsningar. Notera alla primärnycklar (primary keys) och främmande nycklar (foreign keys).
+Skriv en CREATE TABLE-sats för varje tabell nedan. Specifikationerna beskriver vilka kolumner som ska finnas, 
+deras datatyper och begränsningar. Notera alla primärnycklar (primary keys) och främmande nycklar (foreign keys).
 
-* Skapa tabellerna i den ordning de presenteras, eftersom senare tabeller refererar till tidigare skapade tabeller.*
+* Skapa tabellerna i den ordning de presenteras, eftersom senare tabeller refererar till tidigare skapade tabeller. 
 
 ## **Tabell 1: player**
 
 Lagrar alla registrerade användare i spelet.
 
-| Kolumn | Datatyp | Begränsningar / Beskrivning |
-| :---- | :---- | :---- |
-| id | INT | Primärnyckel, auto-increment |
-| username | VARCHAR(50) | NOT NULL, UNIQUE |
-| email | VARCHAR(100) | NOT NULL, UNIQUE |
-| password\_hash | VARCHAR(255) | NOT NULL |
-| role | ENUM | Tillåtna värden: 'detective', 'thief', 'admin' – NOT NULL |
-| created_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
-| last_login | TIMESTAMP | Kan vara NULL |
+| Kolumn        | Datatyp | Begränsningar / Beskrivning |
+|:--------------| :---- | :---- |
+| id            | INT | Primärnyckel, auto-increment |
+| username      | VARCHAR(50) | NOT NULL, UNIQUE |
+| email         | VARCHAR(100) | NOT NULL, UNIQUE |
+| password_hash | VARCHAR(255) | NOT NULL |
+| role          | ENUM | Tillåtna värden: 'detective', 'thief', 'admin' – NOT NULL |
+| created_at    | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| last_login    | TIMESTAMP | Kan vara NULL |
 
 ## **Tabell 2: game**
 
 Representerar en spelsession.
 
-| Kolumn | Datatyp | Begränsningar / Beskrivning |
-| :---- | :---- | :---- |
-| id | INT | Primärnyckel, auto-increment |
-| status | ENUM | Värden: 'waiting', 'active', 'completed', 'abandoned' – DEFAULT 'waiting' |
-| map_id | INT | Refererar till map(id) |
-| started_at | TIMESTAMP | Kan vara NULL |
-| ended_at | TIMESTAMP | Kan vara NULL |
-| winner_role | ENUM | Värden: 'detective', 'thief' – kan vara NULL |
-| created_at | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
+| Kolumn      | Datatyp | Begränsningar / Beskrivning                                               |
+|:------------| :---- |:--------------------------------------------------------------------------|
+| id          | INT | Primärnyckel, auto-increment                                              |
+| status      | ENUM | Värden: 'waiting', 'active', 'completed', 'abandoned' – DEFAULT 'waiting' |
+| map_id      | INT | Refererar till game_map(id)                                               |
+| started_at  | TIMESTAMP | Kan vara NULL                                                             |
+| ended_at    | TIMESTAMP | Kan vara NULL                                                             |
+| winner_role | ENUM | Värden: 'detective', 'thief' – kan vara NULL                              |
+| created_at  | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                                                 |
 
-## **Tabell 3: map**
+## **Tabell 3: game_map**
 
 Beskriver en spelkarta med ett rutmönster.
 
@@ -129,14 +130,14 @@ Beskriver en spelkarta med ett rutmönster.
 
 En plats/nod på en karta. Varje plats tillhör en karta.
 
-| Kolumn | Datatyp | Begränsningar / Beskrivning |
-| :---- | :---- | :---- |
-| id | INT | Primärnyckel, auto-increment |
-| map_id | INT | NOT NULL – Refererar till map(id) |
-| name | VARCHAR(100) | NOT NULL |
+| Kolumn  | Datatyp | Begränsningar / Beskrivning |
+|:--------| :---- | :---- |
+| id      | INT | Primärnyckel, auto-increment |
+| map_id  | INT | NOT NULL – Refererar till game_map(id) |
+| name    | VARCHAR(100) | NOT NULL |
 | coord_x | INT | NOT NULL |
 | coord_y | INT | NOT NULL |
-| type | ENUM | Värden: 'street', 'building', 'hideout', 'checkpoint' – DEFAULT 'street' |
+| type    | ENUM | Värden: 'street', 'building', 'hideout', 'checkpoint' – DEFAULT 'street' |
 
 ## **Tabell 5: route**
 
@@ -145,7 +146,7 @@ En förbindelse (kant) mellan två platser på kartan. Anger transportmedel och 
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
 | id | INT | Primärnyckel, auto-increment |
-| map_id | INT | NOT NULL – Refererar till map(id) |
+| map_id | INT | NOT NULL – Refererar till game_map(id) |
 | from_location | INT | NOT NULL – Refererar till location(id) |
 | to_location | INT | NOT NULL – Refererar till location(id) |
 | transport | ENUM | Värden: 'foot', 'vehicle', 'subway' – DEFAULT 'foot' |
@@ -183,16 +184,16 @@ Lagrar varje spelares rörelse under en omgång. from\_loc kan vara NULL vid spe
 
 Ledtrådar kopplade till ett spel och en plats. found\_by anger vilken detektiv som hittade ledtråden.
 
-| Kolumn | Datatyp | Begränsningar / Beskrivning |
-| :---- | :---- | :---- |
-| id | INT | Primärnyckel, auto-increment |
-| game_id | INT | NOT NULL – Refererar till games(id) |
-| location_id | INT | NOT NULL – Refererar till location(id) |
+| Kolumn | Datatyp | Begränsningar / Beskrivning               |
+| :---- | :---- |:------------------------------------------|
+| id | INT | Primärnyckel, auto-increment              |
+| game_id | INT | NOT NULL – Refererar till game(id)        |
+| location_id | INT | NOT NULL – Refererar till location(id)    |
 | found_by | INT | Kan vara NULL – Refererar till player(id) |
-| description | TEXT | Kan vara NULL |
-| is_found | BOOLEAN | DEFAULT FALSE |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
-| found_at | TIMESTAMP | Kan vara NULL |
+| description | TEXT | Kan vara NULL                             |
+| is_found | BOOLEAN | DEFAULT FALSE                             |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                 |
+| found_at | TIMESTAMP | Kan vara NULL                             |
 
 ## **Tabell 9: catch\_attempt**
 
@@ -271,18 +272,18 @@ Motsvara tabellen player. Skapa ett enum PlayerRole med värdena DETECTIVE, THIE
 Motsvara tabellen games. Skapa enum GameStatus (WAITING, ACTIVE, COMPLETED, ABANDONED) och WinnerRole (DETECTIVE, THIEF).
 
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
-| :---- | :---- | :---- |
-| id | Long | id |
-| status | GameStatus (enum) | status |
-| map | Map | @ManyToOne → map_id |
-| startedAt | LocalDateTime | started_at (nullable) |
-| endedAt | LocalDateTime | ended_at (nullable) |
-| winnerRole | WinnerRole (enum) | winner_role (nullable) |
-| createdAt | LocalDateTime | created\_at |
+|:------------| :---- | :---- |
+| id          | Long | id |
+| status      | GameStatus (enum) | status |
+| gameMap     | GameMap | @ManyToOne → map_id |
+| startedAt   | LocalDateTime | started_at (nullable) |
+| endedAt     | LocalDateTime | ended_at (nullable) |
+| winnerRole  | WinnerRole (enum) | winner_role (nullable) |
+| createdAt   | LocalDateTime | created\_at |
 
-## **Entitet 3: Map**
+## **Entitet 3: GameMap**
 
-Motsvara tabellen map. Obs: Map är ett reserverat ord i Java – döp klassen till GameMap eller liknande.
+Motsvara tabellen game_map. Obs: Map är ett reserverat ord i Java – döp klassen till GameMap eller liknande.
 
 | Fält (Java) | Typ (Java) | Mappas mot kolumn |
 | :---- | :---- | :---- |
@@ -296,27 +297,27 @@ Motsvara tabellen map. Obs: Map är ett reserverat ord i Java – döp klassen t
 
 Motsvara tabellen location. Skapa enum LocationType (STREET, BUILDING, HIDEOUT, CHECKPOINT).
 
-| Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
-| :---- | :---- | :---- |
-| id | Long | id |
-| map | GameMap | @ManyToOne → map\_id |
-| name | String | name |
-| coordX | Integer | coord\_x |
-| coordY | Integer | coord\_y |
-| type | LocationType (enum) | type – @Enumerated(EnumType.STRING) |
+| Fält (Java) | Typ (Java)          | Mappas mot kolumn / Relation        |
+|:------------|:--------------------|:------------------------------------|
+| id          | Long                | id                                  |
+| gameMap     | GameMap             | @ManyToOne → map_id                 |
+| name        | String              | name                                |
+| coordX      | Integer             | coord_x                             |
+| coordY      | Integer             | coord_y                             |
+| type        | LocationType (enum) | type – @Enumerated(EnumType.STRING) |
 
 ## **Entitet 5: Route**
 
 Motsvara tabellen route. Skapa enum TransportType (FOOT, VEHICLE, SUBWAY) – denna enum kan återanvändas i Move.
 
 | Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
-| :---- | :---- | :---- |
-| id | Long | id |
-| map | GameMap | @ManyToOne → map\_id |
-| fromLocation | Location | @ManyToOne → from_location |
-| toLocation | Location | @ManyToOne → to_location |
-| transport | TransportType (enum) | transport |
-| distance | Integer | distance |
+| :---- | :---- |:-----------------------------|
+| id | Long | id                           |
+| game_map | GameMap | @ManyToOne → map_id          |
+| fromLocation | Location | @ManyToOne → from_location   |
+| toLocation | Location | @ManyToOne → to_location     |
+| transport | TransportType (enum) | transport                    |
+| distance | Integer | distance                     |
 
 ## **Entitet 6: GamePlayer**
 
@@ -392,7 +393,7 @@ En-till-en-relation med Player. Använd @OneToOne och @JoinColumn.
 
 ## **SQL-tips**
 
-* Skapa tabellerna i rätt ordning: map → location → route → player → games → game\_player → move → clue → catch\_attempt → player\_stats
+* Skapa tabellerna i rätt ordning: game_map → location → route → player → games → game\_player → move → clue → catch\_attempt → player\_stats
 
 * Kom ihåg att ange NOT NULL och DEFAULT-värden där tabellspecifikationen anger det
 
@@ -404,7 +405,7 @@ En-till-en-relation med Player. Använd @OneToOne och @JoinColumn.
 
 * Döp klassen till GameMap istället för Map för att undvika kollision med java.util.Map
 
-* Använd @Column(nullable \= true) explicit för fält som tillåter NULL
+* Använd @Column(nullable = true) explicit för fält som tillåter NULL
 
 * När en tabell har två foreign keys till samma tabell (t.ex. catch\_attempt.detective\_id och thief\_id), behöver du @JoinColumn med olika namn på varje fält
 
@@ -430,9 +431,10 @@ Lämna in följande:
 
 * En .sql-fil med alla CREATE TABLE-satser
 
-* Alla entitetsklasser (.java) i ett Spring Boot-projekt (eller separata filer)
+* Alla entitetsklasser (.java) i ett Spring Boot-projekt
 
 * Eventuella enum-klasser du skapat
 
-*💡 Kontrollera att din SQL-fil går att köra i MySQL utan fel från topp till botten, och att Spring Boot-applikationen startar utan undantag med ddl-auto=validate eller ddl-auto=none.*
+*💡 Kontrollera att din SQL-fil går att köra i MySQL utan fel från topp till botten, och att Spring Boot-applikationen 
+startar utan undantag med ddl-auto=validate eller ddl-auto=none.*
 
