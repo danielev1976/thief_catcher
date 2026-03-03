@@ -50,18 +50,18 @@ Nedan visas en översikt över alla tabeller och deras relationer.
 
 **Tabeller i systemet:**
 
-| Tabell        | Beskrivning |
-|:--------------| :---- |
-| player        | Alla användare i systemet: detektiver, tjuvar och admins |
-| game          | Spelsessioner med status, tidsstämplar och vinnare |
-| game_map      | Spelkartor med dimensioner |
+| Tabell        | Beskrivning                                              |
+|:--------------|:---------------------------------------------------------|
+| player        | Alla användare i systemet: detektiver, tjuvar och npc    |
+| game          | Spelsessioner med status, tidsstämplar och vinnare       |
+| game_map      | Spelkartor med dimensioner                               |
 | location      | Platser/noder på en karta (gator, byggnader, gömställen) |
-| route         | Förbindelser mellan platser (kanter i grafen) |
-| game_player   | Kopplingstabell – vilka spelare deltar i vilket spel |
-| move          | Rörelshistorik – varje spelares drag per omgång |
-| clue          | Ledtrådar som tjuven lämnar och detektiver hittar |
-| catch_attempt | Gripningsförsök av detektiver |
-| player_stats  | Samlad statistik per spelare |
+| route         | Förbindelser mellan platser (kanter i grafen)            |
+| game_player   | Kopplingstabell – vilka spelare deltar i vilket spel     |
+| move          | Rörelshistorik – varje spelares drag per omgång          |
+| clue          | Ledtrådar som tjuven lämnar och detektiver hittar        |
+| catch_attempt | Gripningsförsök av detektiver                            |
+| player_stats  | Samlad statistik per spelare                             |
 
 **Relationsöversikt:**
 
@@ -310,14 +310,14 @@ Motsvara tabellen location. Skapa enum LocationType (STREET, BUILDING, HIDEOUT, 
 
 Motsvara tabellen route. Skapa enum TransportType (FOOT, VEHICLE, SUBWAY) – denna enum kan återanvändas i Move.
 
-| Fält (Java) | Typ (Java) | Mappas mot kolumn / Relation |
-| :---- | :---- |:-----------------------------|
-| id | Long | id                           |
-| game_map | GameMap | @ManyToOne → map_id          |
+| Fält (Java)  | Typ (Java) | Mappas mot kolumn / Relation |
+|:-------------| :---- |:-----------------------------|
+| id           | Long | id                           |
+| gameMap      | GameMap | @ManyToOne → map_id          |
 | fromLocation | Location | @ManyToOne → from_location   |
-| toLocation | Location | @ManyToOne → to_location     |
-| transport | TransportType (enum) | transport                    |
-| distance | Integer | distance                     |
+| toLocation   | Location | @ManyToOne → to_location     |
+| transport    | TransportType (enum) | transport                    |
+| distance     | Integer | distance                     |
 
 ## **Entitet 6: GamePlayer**
 
