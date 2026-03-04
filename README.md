@@ -40,45 +40,45 @@ Innan du börjar, se till att du har följande på plats:
 
 ### Steg 1 – Starta containern
 * Navigera till mappen som innehåller din docker-compose.yaml-fil:
-```bash cd /sökväg/till/din/mapp```
+```cd /sökväg/till/din/mapp```
 
 * Starta containern i bakgrunden med:
-```bash docker-compose up -d```
+```docker-compose up -d```
 
 Flaggan -d (detached) kör containern i bakgrunden så att terminalen förblir fri att använda.
 
 ### Steg 2 – Verifiera att containern körs
 * Kontrollera status på alla containers:
-```bash docker ps -a```
+```docker ps -a```
 
 I utdatan ska du se din MySQL-container med statusen Up följt av hur länge den har kört, t.ex. Up 30 seconds. 
 Om statusen visar Exited har något gått fel – kontrollera loggarna med docker logs <container-id>.
 
 ### Steg 3 – Gå in i containern
 * Kopiera containerns ID eller namn från utdatan ovan och kör:
-```bash docker exec -it <container-id> bash```
+```docker exec -it <container-id> ```
 
-Du är nu inne i containerns miljö. Prompten byter till något i stil med bash-5.1#.
+Du är nu inne i containerns miljö. Prompten byter till något i stil med -5.1#.
 
 ### Steg 4 – Logga in på MySQL
 * Inifrån containern, logga in på MySQL med:
-```bash mysql -u root -p```
+```mysql -u root -p```
 
 Du uppmanas att ange lösenordet. 
 * Skriv in det lösenord som är konfigurerat i din docker-compose.yaml (t.ex. under MYSQL_ROOT_PASSWORD).
 
 Alternativt kan du skicka med lösenordet direkt i kommandot (mindre säkert):
-```bash mysql -u root -ppassword```
+```mysql -u root -ppassword```
 
 Notera att det inte ska vara något mellanslag mellan -p och lösenordet.
 
 
 ### Steg 5 – Avsluta
 * För att logga ut ur MySQL:
-```bash exit```
+```exit```
 
 * För att lämna containermiljön:
-```bash exit```
+```exit```
 
 # **Modifiera application.yaml filen**
 För att du ska kunna köra projektet lokalt på din dator behöver du först göra följande ändringar i application.yaml file
@@ -88,9 +88,9 @@ För att du ska kunna köra projektet lokalt på din dator behöver du först g�
 # **MySQL körande i Docker**
 Om du kör MySql på en Docker container behöver du först navigera in i container miljön för att kunna göra dina queries.
 Detta gör du genom att i terminalen köra skriptet
-```bash docker ps bash ``` för att se din körande container
+```docker ps ``` för att se din körande container
 kopiera container_id och ersätt det i kommandot:
-```bash docker exec -it container_id bash ```
+```docker exec -it container_id ```
 Nu när du är inne i container miljön kan du logga in på MySql som vanligt med. Bara byta ut lösenordet
 mysql -uroot -p mysupersecretpassword
 
