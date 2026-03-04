@@ -30,6 +30,56 @@ Innan du börjar, se till att du har följande på plats:
 
 * Jakarta Persistence (JPA) / Hibernate aktiverat
 
+# **Sätta upp MySQL på Docker
+
+### Förutsättningar
+
+* Docker och Docker Compose är installerade
+* Du har en docker-compose.yaml-fil konfigurerad med en MySQL-container
+
+
+### Steg 1 – Starta containern
+* Navigera till mappen som innehåller din docker-compose.yaml-fil:
+```bash cd /sökväg/till/din/mapp```
+
+* Starta containern i bakgrunden med:
+```bash docker-compose up -d```
+
+Flaggan -d (detached) kör containern i bakgrunden så att terminalen förblir fri att använda.
+
+### Steg 2 – Verifiera att containern körs
+* Kontrollera status på alla containers:
+```bash docker ps -a```
+
+I utdatan ska du se din MySQL-container med statusen Up följt av hur länge den har kört, t.ex. Up 30 seconds. 
+Om statusen visar Exited har något gått fel – kontrollera loggarna med docker logs <container-id>.
+
+### Steg 3 – Gå in i containern
+* Kopiera containerns ID eller namn från utdatan ovan och kör:
+```bash docker exec -it <container-id> bash```
+
+Du är nu inne i containerns miljö. Prompten byter till något i stil med bash-5.1#.
+
+### Steg 4 – Logga in på MySQL
+* Inifrån containern, logga in på MySQL med:
+```bash mysql -u root -p```
+
+Du uppmanas att ange lösenordet. 
+* Skriv in det lösenord som är konfigurerat i din docker-compose.yaml (t.ex. under MYSQL_ROOT_PASSWORD).
+
+Alternativt kan du skicka med lösenordet direkt i kommandot (mindre säkert):
+```bash mysql -u root -ppassword```
+
+Notera att det inte ska vara något mellanslag mellan -p och lösenordet.
+
+
+### Steg 5 – Avsluta
+* För att logga ut ur MySQL:
+```bash exit```
+
+* För att lämna containermiljön:
+```bash exit```
+
 # **Modifiera application.yaml filen**
 För att du ska kunna köra projektet lokalt på din dator behöver du först göra följande ändringar i application.yaml file
 - Ersätt namnet för databasen med den du kör lokalt
@@ -90,15 +140,15 @@ deras datatyper och begränsningar. Notera alla primärnycklar (primary keys) oc
 
 Lagrar alla registrerade användare i spelet.
 
-| Kolumn        | Datatyp | Begränsningar / Beskrivning |
-|:--------------| :---- | :---- |
-| id            | INT | Primärnyckel, auto-increment |
-| username      | VARCHAR(50) | NOT NULL, UNIQUE |
-| email         | VARCHAR(100) | NOT NULL, UNIQUE |
-| password_hash | VARCHAR(255) | NOT NULL |
-| role          | ENUM | Tillåtna värden: 'detective', 'thief', 'admin' – NOT NULL |
-| created_at    | TIMESTAMP | DEFAULT CURRENT\_TIMESTAMP |
-| last_login    | TIMESTAMP | Kan vara NULL |
+| Kolumn        | Datatyp | Begränsningar / Beskrivning                             |
+|:--------------| :---- |:--------------------------------------------------------|
+| id            | INT | Primärnyckel, auto-increment                            |
+| username      | VARCHAR(50) | NOT NULL, UNIQUE                                        |
+| email         | VARCHAR(100) | NOT NULL, UNIQUE                                        |
+| password_hash | VARCHAR(255) | NOT NULL                                                |
+| role          | ENUM | Tillåtna värden: 'detective', 'thief', 'npc' – NOT NULL |
+| created_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                               |
+| last_login    | TIMESTAMP | Kan vara NULL                                           |
 
 ## **Tabell 2: game**
 
@@ -257,15 +307,15 @@ För varje tabell du skapade i Del 1 ska du nu skriva en motsvarande Java-klass 
 
 Motsvara tabellen player. Skapa ett enum PlayerRole med värdena DETECTIVE, THIEF och ADMIN.
 
-| Fält (Java) | Typ (Java) | Mappas mot kolumn |
-| :---- | :---- | :---- |
-| id | Long / Integer | id |
-| username | String | username |
-| email | String | email |
-| passwordHash | String | password\_hash |
+| Fält (Java) | Typ (Java) | Mappas mot kolumn                          |
+| :---- | :---- |:-------------------------------------------|
+| id | Long / Integer | id                                         |
+| username | String | username                                   |
+| email | String | email                                      |
+| passwordHash | String | password_hash                              |
 | role | PlayerRole (enum) | role – använd @Enumerated(EnumType.STRING) |
-| createdAt | LocalDateTime / Instant | created_at |
-| lastLogin | LocalDateTime / Instant | last_login (nullable) |
+| createdAt | LocalDateTime / Instant | created_at                                 |
+| lastLogin | LocalDateTime / Instant | last_login (nullable)                      |
 
 ## **Entitet 2: Game**
 
