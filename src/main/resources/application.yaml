@@ -4,9 +4,9 @@ spring:
 
   datasource:
     # 1. Added ?serverTimezone=UTC for stable connection
-    url: jdbc:mysql://localhost:3306/mydatabase?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/localdb?serverTimezone=UTC
     username: root
-    password: mysupersecretpassword
+    password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
