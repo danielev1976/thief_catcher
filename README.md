@@ -146,7 +146,7 @@ Lagrar alla registrerade användare i spelet.
 | username      | VARCHAR(50) | NOT NULL, UNIQUE                                        |
 | email         | VARCHAR(100) | NOT NULL, UNIQUE                                        |
 | password_hash | VARCHAR(255) | NOT NULL                                                |
-| role          | ENUM | Tillåtna värden: 'detective', 'thief', 'npc' – NOT NULL |
+| role          | ENUM | Tillåtna värden: 'DETECTIVE', 'THIEF', 'NPC' – NOT NULL |
 | created_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                               |
 | last_login    | TIMESTAMP | Kan vara NULL                                           |
 
@@ -157,11 +157,11 @@ Representerar en spelsession.
 | Kolumn      | Datatyp | Begränsningar / Beskrivning                                               |
 |:------------| :---- |:--------------------------------------------------------------------------|
 | id          | INT | Primärnyckel, auto-increment                                              |
-| status      | ENUM | Värden: 'waiting', 'active', 'completed', 'abandoned' – DEFAULT 'waiting' |
+| status      | ENUM | Värden: 'WAITING', 'ACTIVE', 'COMPLETED', 'ABANDONED' – DEFAULT 'WAITING' |
 | map_id      | INT | Refererar till game_map(id)                                               |
 | started_at  | TIMESTAMP | Kan vara NULL                                                             |
 | ended_at    | TIMESTAMP | Kan vara NULL                                                             |
-| winner_role | ENUM | Värden: 'detective', 'thief' – kan vara NULL                              |
+| winner_role | ENUM | Värden: 'DETECTIVE', 'THIEF' – kan vara NULL                              |
 | created_at  | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                                                 |
 
 ## **Tabell 3: game_map**
@@ -217,7 +217,7 @@ Kopplingstabell som anger vilka spelare som deltar i ett spel och i vilken roll.
 
 ## **Tabell 7: move**
 
-Lagrar varje spelares rörelse under en omgång. from\_loc kan vara NULL vid spelets start.
+Lagrar varje spelares rörelse under en omgång. from_loc kan vara NULL vid spelets start.
 
 | Kolumn | Datatyp | Begränsningar / Beskrivning |
 | :---- | :---- | :---- |
@@ -232,7 +232,7 @@ Lagrar varje spelares rörelse under en omgång. from\_loc kan vara NULL vid spe
 
 ## **Tabell 8: clue**
 
-Ledtrådar kopplade till ett spel och en plats. found\_by anger vilken detektiv som hittade ledtråden.
+Ledtrådar kopplade till ett spel och en plats. found_by anger vilken detektiv som hittade ledtråden.
 
 | Kolumn | Datatyp | Begränsningar / Beskrivning               |
 | :---- | :---- |:------------------------------------------|
@@ -285,7 +285,7 @@ För varje tabell du skapade i Del 1 ska du nu skriva en motsvarande Java-klass 
 
 * @Entity – markerar klassen som en JPA-entitet
 
-* @Table(name \= "tabellnamn") – mappar till rätt tabell
+* @Table(name = "tabellnamn") – mappar till rätt tabell (bara vid discrepans mellan tabellnamn och entity)
 
 * @Id – markerar primärnyckelfältet
 
@@ -457,13 +457,200 @@ En-till-en-relation med Player. Använd @OneToOne och @JoinColumn.
 
 * Använd @Column(nullable = true) explicit för fält som tillåter NULL
 
-* När en tabell har två foreign keys till samma tabell (t.ex. catch\_attempt.detective\_id och thief\_id), behöver du @JoinColumn med olika namn på varje fält
+* När en tabell har två foreign keys till samma tabell (t.ex. catch_attempt.detective_id och thief_id), 
+behöver du @JoinColumn med olika namn på varje fält
 
-* @CreationTimestamp (Hibernate) sätter automatiskt värdet vid INSERT – användbart för created\_at-fält
+* @CreationTimestamp (Hibernate) sätter automatiskt värdet vid INSERT – användbart för created_at-fält
 
-* För Boolean-fält som is\_caught och successful, använd Java-typen Boolean (inte boolean) om fältet kan vara null
+* För Boolean-fält som is_caught och successful, använd Java-typen Boolean (inte boolean) om fältet kan vara null
 
 * Lägg till en no-args-konstruktor i varje entitet (krav för JPA)
+
+DTOs för Detektiv- och Tjuvspelet
+
+Player DTOs
+CreatePlayerRequest
+Används när en ny spelare registreras i systemet.
+username
+email
+PlayerResponse
+Returneras efter registrering eller vid hämtning av spelarinfo.
+id
+username
+email
+createdAt
+lastLogin
+
+Game DTOs
+CreateGameRequest
+En spelare skapar en ny spelomgång och väljer karta.
+mapId
+hostPlayerId
+JoinGameRequest
+En spelare ansluter till ett befintligt spel. Ingen roll anges här — rollen tilldelas senare av hosten eller slumpmässigt av servern vid start.
+gameId
+playerId
+AssignRoleRequest
+Hosten tilldelar roller till spelare innan spelet startar.
+gameId
+playerId
+gameRole        ← DETECTIVE, THIEF eller NPC
+StartGameRequest
+Hosten startar spelet när alla spelare fått roller.
+gameId
+hostPlayerId
+GameResponse
+Returneras när ett spel skapas, startas eller hämtas. Ger en överblick av spelomgången.
+id
+status
+mapId
+startedAt
+endedAt
+winnerRole
+players         ← lista av GamePlayerResponse
+GameStateResponse
+En mer detaljerad bild av spelets nuvarande tillstånd, används under en aktiv spelomgång. Kombinerar information från flera tabeller.
+gameId
+currentTurn
+status
+players         ← lista av GamePlayerResponse med positioner
+visibleClues    ← lista av ClueResponse (endast hittade ledtrådar)
+map             ← GameMapResponse
+
+GamePlayer DTOs
+GamePlayerResponse
+Representerar en spelare inom en specifik spelomgång. Används inuti GameResponse och GameStateResponse.
+id
+playerId
+username
+gameRole        ← DETECTIVE, THIEF eller NPC
+isCaught
+joinedAt
+currentLocationId   ← hämtas från senaste move
+
+Map DTOs
+GameMapResponse
+Returneras när kartan för ett spel hämtas. Används inuti GameStateResponse.
+id
+name
+gridWidth
+gridHeight
+description
+locations       ← lista av LocationResponse
+routes          ← lista av RouteResponse
+LocationResponse
+Representerar en nod på kartan.
+id
+name
+coordX
+coordY
+type            ← STREET, BUILDING, HIDEOUT, CHECKPOINT
+RouteResponse
+Representerar en koppling mellan två platser på kartan.
+id
+fromLocationId
+toLocationId
+transport       ← FOOT, VEHICLE, SUBWAY
+distance
+
+Move DTOs
+MoveRequest
+En spelare (eller NPC via servern) gör ett drag. Valideras mot route-tabellen.
+gameId
+playerId
+fromLocationId
+toLocationId
+transport       ← måste matcha routen
+MoveResponse
+Bekräftelse på att draget godkänts och sparats.
+id
+playerId
+fromLocationId
+toLocationId
+transport
+turnNumber
+movedAt
+
+Clue DTOs
+ClueResponse
+Returneras när en detektiv hittar eller när servern genererar en ledtråd. Synlig endast för detektiver.
+id
+gameId
+locationId
+description
+isFound
+foundAt
+FindClueRequest
+En detektiv försöker hitta en ledtråd på sin nuvarande plats.
+gameId
+playerId
+locationId
+
+CatchAttempt DTOs
+CatchAttemptRequest
+En detektiv försöker gripa tjuven. Kräver att båda befinner sig på samma plats, vilket valideras av servern mot move-tabellen.
+gameId
+detectivePlayerId
+thiefPlayerId
+locationId
+CatchAttemptResponse
+Returnerar resultatet av gripningsförsöket. Om lyckat uppdateras game.status och game.winnerRole.
+id
+successful
+attemptedAt
+winnerRole      ← null om misslyckat, DETECTIVE om lyckat
+
+NPC DTOs
+AddNpcRequest
+Används av hosten för att lägga till en NPC i spelomgången.
+gameId
+npcType         ← PATROL_GUARD, WITNESS, INFORMANT, DECOY, CORRUPT_OFFICER
+behavior        ← STATIONARY, PATROL, TRIGGERED
+patrolRoute     ← lista av locationIds, endast relevant för PATROL
+triggerEvent    ← t.ex. GENERATE_CLUE, REVEAL_TRANSPORT
+NpcResponse
+Returneras efter att en NPC lagts till eller vid hämtning av NPC-info.
+id
+gamePlayerId
+npcType
+behavior
+patrolRoute
+triggerEvent
+currentLocationId   ← hämtas från senaste move
+
+PlayerStat DTOs
+PlayerStatResponse
+Returneras efter avslutad spelomgång eller vid hämtning av spelarstatistik.
+playerId
+username
+gamesPlayed
+gamesWon
+timesCaught
+thievesCaught
+
+Hur de hänger ihop med spelomgången
+1. REGISTRERING
+   CreatePlayerRequest → PlayerResponse
+
+2. SKAPA & GÅ MED I SPEL
+   CreateGameRequest → GameResponse
+   JoinGameRequest   → GameResponse (uppdaterad spelarlista)
+   AddNpcRequest     → NpcResponse
+
+3. TILLDELA ROLLER & STARTA
+   AssignRoleRequest → GamePlayerResponse
+   StartGameRequest  → GameResponse (status = ACTIVE)
+
+4. UNDER SPELET (upprepas varje tur)
+   MoveRequest         → MoveResponse
+   FindClueRequest     → ClueResponse
+   CatchAttemptRequest → CatchAttemptResponse
+   (valfritt) GameStateResponse hämtas av klienten varje tur
+
+5. SPELET AVSLUTAS
+   CatchAttemptResponse (successful = true)
+   → GameResponse (status = COMPLETED, winnerRole = DETECTIVE/THIEF)
+   → PlayerStatResponse (uppdaterad statistik) Sonnet 4.6
 
 ## **Felsökning**
 
