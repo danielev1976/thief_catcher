@@ -1,6 +1,5 @@
 package io.education.thief_catcher.entity;
 
-import io.education.thief_catcher.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "players")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,8 +16,7 @@ public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "player_id")
-    private Integer playerId;
+    private Integer id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -27,11 +24,8 @@ public class Player {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
-    private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    private Role role; // default to player
+    private enum Role {THIEF, DETECTIVE, NPC}; // default to player
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
