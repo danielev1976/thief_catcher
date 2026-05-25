@@ -28,6 +28,8 @@ public class GameMap {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+
+
 /*
     @OneToMany(mappedBy = "gameMap", cascade = CascadeType.ALL)
     private List<Location> locations;
