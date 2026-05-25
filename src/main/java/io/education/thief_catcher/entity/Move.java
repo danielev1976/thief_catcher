@@ -6,13 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-// GamePlayer.java
+
+// Move.java
 @Entity
-@Table(name = "game_players")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GamePlayer {
+public class Move {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,17 +26,25 @@ public class GamePlayer {
     @JoinColumn(name = "player_id", nullable = false)
     private Player player;
 
+    @ManyToOne
+    @JoinColumn(name = "from_loc")
+    private Location fromLocation;
+
+    @ManyToOne
+    @JoinColumn(name = "to_loc", nullable = false)
+    private Location toLocation;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GameRole role;
+    private TransportType transport = TransportType.foot;
 
-    @Column(name = "is_caught", nullable = false)
-    private Boolean isCaught = false;
+    @Column(name = "turn_number", nullable = false)
+    private Integer turnNumber;
 
-    @Column(name = "joined_at", updatable = false)
-    private LocalDateTime joinedAt;
+    @Column(name = "moved_at", updatable = false)
+    private LocalDateTime movedAt;
 
-    public enum GameRole {
-        detective, thief
+    public enum TransportType {
+        foot, vehicle, subway
     }
 }

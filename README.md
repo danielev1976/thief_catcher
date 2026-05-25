@@ -675,3 +675,219 @@ Lämna in följande:
 *💡 Kontrollera att din SQL-fil går att köra i MySQL utan fel från topp till botten, och att Spring Boot-applikationen 
 startar utan undantag med ddl-auto=validate eller ddl-auto=none.*
 
+
+1. REGISTRERING
+   CreatePlayerRequest → PlayerResponse
+
+2. SKAPA & GÅ MED I SPEL
+   CreateGameRequest → GameResponse
+   JoinGameRequest   → GameResponse (uppdaterad spelarlista)
+   AddNpcRequest     → NpcResponse
+
+3. TILLDELA ROLLER & STARTA
+   AssignRoleRequest → GamePlayerResponse
+   StartGameRequest  → GameResponse (status = ACTIVE)
+
+4. UNDER SPELET (upprepas varje tur)
+   MoveRequest         → MoveResponse
+   FindClueRequest     → ClueResponse
+   CatchAttemptRequest → CatchAttemptResponse
+   (valfritt) GameStateResponse hämtas av klienten varje tur
+
+5. SPELET AVSLUTAS
+   CatchAttemptResponse (successful = true)
+   → GameResponse (status = COMPLETED, winnerRole = DETECTIVE/THIEF)
+   → PlayerStatResponse (uppdaterad statistik)
+
+// =====================
+// 1. REGISTRERING
+// =====================
+
+public class CreatePlayerRequest {
+private String username;
+private String email;
+}
+
+public class PlayerResponse {
+private Integer id;
+private String username;
+private String email;
+private LocalDateTime createdAt;
+private LocalDateTime lastLogin;
+}
+
+// =====================
+// 2. SKAPA & GÅ MED I SPEL
+// =====================
+
+public class CreateGameRequest {
+private Integer mapId;
+private Integer hostPlayerId;
+}
+
+public class JoinGameRequest {
+private Integer gameId;
+private Integer playerId;
+}
+
+public class AddNpcRequest {
+private Integer gameId;
+private NpcType npcType;         // PATROL_GUARD, WITNESS, INFORMANT, DECOY, CORRUPT_OFFICER
+private NpcBehavior behavior;    // STATIONARY, PATROL, TRIGGERED
+private List<Integer> patrolRoute; // null if STATIONARY or TRIGGERED
+private String triggerEvent;     // null if PATROL
+}
+
+public class NpcResponse {
+private Integer id;
+private Integer gamePlayerId;
+private NpcType npcType;
+private NpcBehavior behavior;
+private List<Integer> patrolRoute;
+private String triggerEvent;
+private Integer currentLocationId;
+}
+
+public class GameResponse {
+private Integer id;
+private GameStatus status;       // WAITING, ACTIVE, COMPLETED, ABANDONED
+private Integer mapId;
+private LocalDateTime startedAt;
+private LocalDateTime endedAt;
+private GameRole winnerRole;     // null until game is COMPLETED
+private List<GamePlayerResponse> players;
+}
+
+// =====================
+// 3. TILLDELA ROLLER & STARTA
+// =====================
+
+public class AssignRoleRequest {
+private Integer gameId;
+private Integer playerId;
+private GameRole gameRole;       // DETECTIVE, THIEF, NPC
+}
+
+public class StartGameRequest {
+private Integer gameId;
+private Integer hostPlayerId;
+}
+
+public class GamePlayerResponse {
+private Integer id;
+private Integer playerId;
+private String username;
+private GameRole gameRole;       // DETECTIVE, THIEF, NPC
+private Boolean isCaught;
+private LocalDateTime joinedAt;
+private Integer currentLocationId; // derived from latest move
+}
+
+// =====================
+// 4. UNDER SPELET
+// =====================
+
+public class MoveRequest {
+private Integer gameId;
+private Integer playerId;
+private Integer fromLocationId;
+private Integer toLocationId;
+private TransportType transport; // FOOT, VEHICLE, SUBWAY
+}
+
+public class MoveResponse {
+private Integer id;
+private Integer playerId;
+private Integer fromLocationId;
+private Integer toLocationId;
+private TransportType transport;
+private Integer turnNumber;
+private LocalDateTime movedAt;
+}
+
+public class FindClueRequest {
+private Integer gameId;
+private Integer playerId;
+private Integer locationId;
+}
+
+public class ClueResponse {
+private Integer id;
+private Integer gameId;
+private Integer locationId;
+private String description;
+private Boolean isFound;
+private LocalDateTime foundAt;
+}
+
+public class CatchAttemptRequest {
+private Integer gameId;
+private Integer detectivePlayerId;
+private Integer thiefPlayerId;
+private Integer locationId;
+}
+
+public class CatchAttemptResponse {
+private Integer id;
+private Boolean successful;
+private LocalDateTime attemptedAt;
+private GameRole winnerRole;     // null if unsuccessful, DETECTIVE if successful
+}
+
+// Fetched by client each turn to get full picture of current game state
+public class GameStateResponse {
+private Integer gameId;
+private Integer currentTurn;
+private GameStatus status;
+private GameMapResponse map;
+private List<GamePlayerResponse> players;
+private List<ClueResponse> visibleClues; // only clues where isFound = true
+}
+
+// =====================
+// 5. SPELET AVSLUTAS
+// =====================
+
+// CatchAttemptResponse (successful = true) triggers:
+// → GameResponse with updated status and winnerRole
+// → PlayerStatResponse with updated stats for each player
+
+public class PlayerStatResponse {
+private Integer playerId;
+private String username;
+private Integer gamesPlayed;
+private Integer gamesWon;
+private Integer timesCaught;
+private Integer thievesCaught;
+}
+
+// =====================
+// DELADE INNER DTOs
+// (används inuti andra responses)
+// =====================
+
+public class GameMapResponse {
+private Integer id;
+private String name;
+private Integer gridWidth;
+private Integer gridHeight;
+private String description;
+private List<LocationResponse> locations;
+private List<RouteResponse> routes;
+}
+
+public class LocationResponse {
+private Integer id;
+private String name;
+private Integer coordX;
+private Integer coordY;
+private LocationType type;       // STREET, BUILDING, HIDEOUT, CHECKPOINT
+}
+
+public class RouteResponse {
+private Integer id;
+private Integer fromLocationId;
+private Integer toLocationId;
+private TransportType transport;
+private Integer distance;
+}
