@@ -18,7 +18,7 @@ public class GameController {
 
     @GetMapping("/auth")
     public void authenticate(){
-
+        System.out.println("Authenticate");
     }
 
     // =====================
